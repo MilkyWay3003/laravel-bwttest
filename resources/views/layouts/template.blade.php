@@ -37,7 +37,7 @@
                                 <li>
                                     <form method="post" action="{{ route('logout') }}">
                                         {{ csrf_field() }}
-                                        <button class="btn btn-primary" type="submit">Log out</button>
+                                        <button class="button" type="submit">Log out</button>
                                     </form>
                                 </li>
                             </ul>

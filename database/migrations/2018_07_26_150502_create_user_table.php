@@ -17,7 +17,7 @@ class CreateUserTable extends Migration
             $table->integer('id')->unsigned()->autoIncrement();
             $table->string('firstname');
             $table->string('lastname');
-            $table->string('email');
+            $table->string('email')->unique();
             $table->string('password');
             $table->boolean('gender')->default(false);
             $table->date('datebirthday');

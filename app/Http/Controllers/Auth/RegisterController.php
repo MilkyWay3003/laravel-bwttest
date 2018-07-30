@@ -51,13 +51,13 @@ class RegisterController extends Controller
         return Validator::make($data, [
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255|unique:user',
             'password' => 'required|string|min:6|confirmed',
-            'gender' => [
-                'required',
+            'gender' => [                
                 Rule::in(['male', 'female', 'none']),
             ],
-        ]); // https://laravel.com/docs/5.4/validation#available-validation-rules
+            'datebirthday'=> 'date_format:"d-m-Y"',
+        ]); 
     }
 
     /**

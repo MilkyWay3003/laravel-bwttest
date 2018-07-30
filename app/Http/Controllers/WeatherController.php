@@ -15,19 +15,19 @@ class WeatherController extends Controller
 
     public function index()
     {
-        $data['data'] = [
-            $this->parser(),
-            $this->myparser(),
-        ];
-        return view('weather', $data);
+        $data = Weather::all(); 
+              
+        return view('weather', [
+            'data' => $data,
+        ]);
+    
     }
 
-    protected function parser()
+    public static function parser()
     {
-       //by using PHPHtmlParser
         $data = [];
         $data[0] = "Parser weather: method by using PHPHtmlParser";
-
+        
         $dom = new Dom;
         $dom->loadFromUrl('http://www.gismeteo.ua/city/daily/5093/');
 
@@ -52,10 +52,20 @@ class WeatherController extends Controller
         $temperature_water = $dom->find('.higher')->find('.water')->find('.c');
         $data[7] = $temperature_water->text;
 
-        return $data;
+        Weather::create([
+            'method' => $data[0],
+            'temperature'=> $data[1],
+            'cloudness'=> $data[2],
+            'wind'=> $data[3],
+            'wind_speed'=> $data[4],
+            'pressure'=> $data[5],
+            'humanity'=> $data[6],
+            'temperature_water'=> $data[7],
+        ]);
+
     }
     
-    function parse($p1,$p2) 
+    static function parse($p1,$p2) 
     {
         $text = file_get_contents('http://www.gismeteo.ua/city/daily/5093/');
         $num1 = strpos($text, $p1);
@@ -64,40 +74,49 @@ class WeatherController extends Controller
         return strip_tags(substr($num2, 0, strpos($num2,$p2)));
     }
 
-    protected function myparser()
+    public static function myparser()
     {
-        //hand made
         $data = [];
         $data[0] = "Parser weather: hand made method";
         $pattern1 = "<dd class='value m_temp c'>";
         $pattern2 = "<span class=";
-        $data[1] = $this->parse($pattern1, $pattern2);       
+        $data[1] = WeatherController::parse($pattern1, $pattern2);       
             
         $pattern1 = "<dd><table><tr><td>";
         $pattern2 = "</td></tr></table></dd>";
-        $data[2] = $this->parse($pattern1, $pattern2);         
+        $data[2] = WeatherController::parse($pattern1, $pattern2);         
 
         $pattern1 = "<dd class='value m_wind ms' style='display:inline'>";
         $pattern2 = "</dt>";
-        $data[4] = $this->parse($pattern1, $pattern2);         
+        $data[4] = WeatherController::parse($pattern1, $pattern2);         
         $data[3] = substr($data[4], -4);
         $data[4] = $data[4][0];
                       
         $pattern1 = "<dd class='value m_press torr'>";
         $pattern2 = "<span class=";
-        $data[5] = $this->parse($pattern1, $pattern2); 
+        $data[5] = WeatherController::parse($pattern1, $pattern2); 
                
         $pattern1 = "wicon hum";
         $pattern2 = "<span class=";
-        $data[6] = $this->parse($pattern1, $pattern2); 
+        $data[6] = WeatherController::parse($pattern1, $pattern2); 
         $data[6] = substr($data[6], -2);
       
         $pattern1 = "wicon water";
         $pattern2 = "<span class=";
-        $data[7] = $this->parse($pattern1, $pattern2);
+        $data[7] = WeatherController::parse($pattern1, $pattern2);
         $data[7] = substr($data[7], -2);
 
-        return $data;
+        Weather::create([
+            'method' => $data[0],
+            'temperature'=> $data[1],
+            'cloudness'=> $data[2],
+            'wind'=> $data[3],
+            'wind_speed'=> $data[4],
+            'pressure'=> $data[5],
+            'humanity'=> $data[6],
+            'temperature_water'=> $data[7],
+        ]);
+
     }
 
 }

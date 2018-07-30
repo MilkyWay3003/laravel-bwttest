@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateFeedbacksTable extends Migration
+class AddFirstnameEmailToFeedbacksTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,10 @@ class CreateFeedbacksTable extends Migration
      */
     public function up()
     {
-        if(!Schema::hasTable('feedbacks')){
-        Schema::create('feedbacks', function (Blueprint $table) {
-            $table->integer('user_id')->unsigned();
-            $table->text('message');
-            $table->foreign('user_id')->references('id')->on('user')->onDelete('cascade')->onUpdate('restrict');
-            $table->timestamps();
+        Schema::table('feedbacks', function (Blueprint $table) {
+            $table->string('firstname')->after('user_id')->nullable();
+            $table->string('email')->after('firstname')->nullable();
         });
-      }
     }
 
     /**

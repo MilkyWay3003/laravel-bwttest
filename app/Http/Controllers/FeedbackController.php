@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Feedback;
 use Illuminate\Http\Request;
+use ReCaptcha\ReCaptcha;
 
 class FeedbackController extends Controller
 {
@@ -31,9 +32,14 @@ class FeedbackController extends Controller
     {
         return Validator::make($data, [
             'firstname' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255|unique:user',
             'message' => 'required|string|min:20|max:255',
-        ]);
+            'g-recaptcha-response'=>'required|recaptcha'
+        ],
+        [
+            'g-recaptcha-response.required'=>'Captcha is required'
+        ]
+        );
     }
 
     /**
@@ -44,24 +50,31 @@ class FeedbackController extends Controller
      */
     public function store(Request $request)
     {
-        // env('RECAPTCHA_SECRET') - получение секретного ключа рекапчи
-        if ($request->has('user_id')) {
-            // Feedback'у присвоим юзера
-            Feedback::create([
-                'user_id' => $request->get('user_id'),
-                'message' => $request->get('message'),
-            ]); // Mass Assignment
-        } else {
-            // аноним
-            Feedback::create([
-                'firstname' => $request->get('firstname'),
-                'email' => $request->get('email'),
-                'message' => $request->get('message'),
-            ]);
-        }
+        $response = $request->get('g-recaptcha-response');
+        $remote = $_SERVER['REMOTE_ADDR'];
+        $secret = env('RECAPTCHA_SECRET');
+        $reCaptcha = new ReCaptcha($secret);
 
-        return redirect()->route('feedbacks.list');
-    }
+        $resp = $reCaptcha->verify($response, $remote);
+
+           if ($resp->isSuccess()) {
+                if ($request->has('user_id')) {                    
+                    Feedback::create([
+                        'user_id' => $request->get('user_id'),
+                        'message' => $request->get('message'),
+                    ]); // Mass Assignment
+                } else {
+                    // Anonymous user
+                    Feedback::create([
+                        'firstname' => $request->get('firstname'),
+                        'email' => $request->get('email'),
+                        'message' => $request->get('message'),
+                    ]);
+                }
+            return redirect()->route('feedbacks.list');
+         }
+
+      }
 
     public function showFeedbacks() {
         $feedbacks = Feedback::all();

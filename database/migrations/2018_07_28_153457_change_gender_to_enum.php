@@ -18,7 +18,7 @@ class ChangeGenderToEnum extends Migration
         });
 
         Schema::table('user', function (Blueprint $table) {
-            $table->enum('gender', ['male', 'female', 'none'])->default('male');
+            $table->enum('gender', ['male', 'female', 'none'])->default('male')->after('password');
         });
     }
 
